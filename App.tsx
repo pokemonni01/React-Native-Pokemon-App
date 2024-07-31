@@ -4,14 +4,21 @@ import SettingScreen from "./src/screens/SettingScreen";
 import { Provider as ReduxProvider } from "react-redux";
 import { store, persistor } from "./src/redux/store";
 import { PersistGate } from "redux-persist/integration/react";
+import { useSelector } from "react-redux";
+import { RootState } from "./src/redux/store";
+import { DarkTheme, DefaultTheme } from "@react-navigation/native";
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
-  return (
-    <ReduxProvider store={store}>
-      <PersistGate persistor={persistor} loading={null}>
-        <NavigationContainer>
+
+  const AppContainer = () => {
+    const isDarkModeEnabled = useSelector(
+      (state: RootState) => state.settingReducer.isDarkModeEnabled
+    );
+    const theme = isDarkModeEnabled ? "dark" : "light";
+    return(
+      <NavigationContainer  theme={theme === "dark" ? DarkTheme : DefaultTheme}>
           <Stack.Navigator initialRouteName="Setting">
             <Stack.Screen
               name="Setting"
@@ -20,6 +27,13 @@ export default function App() {
             />
           </Stack.Navigator>
         </NavigationContainer>
+    );
+  }
+
+  return (
+    <ReduxProvider store={store}>
+      <PersistGate persistor={persistor} loading={null}>
+        <AppContainer />
       </PersistGate>
     </ReduxProvider>
   );
