@@ -7,14 +7,14 @@ import { PersistGate } from "redux-persist/integration/react";
 import { useSelector } from "react-redux";
 import { RootState } from "./src/redux/store";
 import { DarkTheme, DefaultTheme } from "@react-navigation/native";
-import HomeScreen from "./src/screens/HomeScreen";
+import HomeScreen from "./src/features/HomeScreen";
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   const AppContainer = () => {
     const isDarkModeEnabled = useSelector(
-      (state: RootState) => state.settingReducer.isDarkModeEnabled
+      (state: RootState) => state.persistedReducer.settingReducer.isDarkModeEnabled
     );
     const theme = isDarkModeEnabled ? "dark" : "light";
     return (
