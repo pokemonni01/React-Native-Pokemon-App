@@ -9,7 +9,7 @@ export enum HomeScreenState {
 }
 
 const initialState = {
-    pokemonTypes: [] as Pokemon[],
+    pokemons: [] as Pokemon[],
     homeScreenState: HomeScreenState.INITIAL,
 };
 
@@ -18,7 +18,7 @@ const homeSlice = createSlice({
     initialState,
     reducers: {
         setPokemons: (state, action) => {
-            state.pokemonTypes = action.payload;
+            state.pokemons = action.payload;
         },
         setHomeScreenState: (state, action) => {
             state.homeScreenState = action.payload;

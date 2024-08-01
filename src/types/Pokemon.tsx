@@ -1,20 +1,13 @@
-type Pokemon = {
-    id: number;
+interface Pokemon {
     name: string;
-    height: number;
-    weight: number;
-    types: Array<string>;
-    abilities: Array<string>;
-    sprites: {
-        front_default: string;
-        back_default: string;
-    };
-    stats: Array<{
-        base_stat: number;
-        stat: {
-        name: string;
-        };
-    }>;
+    url: string;
+}
+
+const getImageUrl = (url: string) => {
+    const urlParts = url.split("/");
+    const id = urlParts[urlParts.length - 2];
+    return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
 }
 
 export default Pokemon;
+export { getImageUrl };

@@ -1,4 +1,4 @@
-import { View, Text } from "react-native";
+import { View, Text, ScrollView } from "react-native";
 import { Loading } from "../components/Loading";
 import { Theme } from "../types/enums/Theme";
 import { useDispatch, useSelector } from "react-redux";
@@ -8,17 +8,23 @@ import colors from "../core/colors";
 import { HomeScreenState } from "./homeSlice";
 import { useEffect } from "react";
 import pokemonApi from "../services/pokemonApi";
-import { setHomeScreenState } from "./homeSlice";
-import { AxiosError } from "axios";
+import { setHomeScreenState, setPokemons } from "./homeSlice";
+import { PokemonItem } from "../components/PokemonItem";
 
 const HomeScreen = () => {
   const isDarkModeEnabled = useSelector(
-    (state: RootState) => state.persistedReducer.settingReducer.isDarkModeEnabled
+    (state: RootState) =>
+      state.persistedReducer.settingReducer.isDarkModeEnabled
   );
   const theme = isDarkModeEnabled ? Theme.Dark : Theme.Light;
   const styles = styling(theme);
 
-  const state = useSelector((state: RootState) => state.homeReducer.homeScreenState);
+  const state = useSelector(
+    (state: RootState) => state.homeReducer.homeScreenState
+  );
+  const pokemons = useSelector(
+    (state: RootState) => state.homeReducer.pokemons
+  );
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -33,10 +39,11 @@ const HomeScreen = () => {
       const data = await pokemonApi.fetchPokemons();
       console.log(data.results);
       dispatch(setHomeScreenState(HomeScreenState.SUCCESS));
-    } catch(error: any) {
+      dispatch(setPokemons(data.results));
+    } catch (error: any) {
       dispatch(setHomeScreenState(HomeScreenState.ERROR));
     }
-  }
+  };
 
   const LoadingState = () => {
     return (
@@ -46,22 +53,28 @@ const HomeScreen = () => {
     );
   };
 
+  const SuccessState = () => {
+    return <ScrollView>
+      {
+        pokemons.map((pokemon) => {
+          return <PokemonItem key={pokemon.name} pokemon={pokemon} theme={theme} />;
+        })
+      }
+    </ScrollView>;
+  };
+
   const handleState = (state: HomeScreenState) => {
     switch (state) {
       case HomeScreenState.LOADING:
         return <LoadingState />;
       case HomeScreenState.SUCCESS:
-        return <Text>Loaded</Text>;
+        return <SuccessState />;
       case HomeScreenState.ERROR:
         return <Text>Error</Text>;
     }
-  }
+  };
 
-  return (
-    <View style={styles.container}>
-      {handleState(state)}
-    </View>
-  );
+  return <View style={styles.container}>{handleState(state)}</View>;
 };
 
 const styling = (theme: Theme) => {
@@ -69,7 +82,6 @@ const styling = (theme: Theme) => {
   return StyleSheet.create({
     container: {
       width: "100%",
-      padding: 16,
       backgroundColor: color.background,
       flex: 1,
     },
