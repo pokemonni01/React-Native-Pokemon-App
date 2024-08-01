@@ -11,6 +11,7 @@ import {
   PURGE,
   REGISTER,
 } from "redux-persist";
+import { homeReducer } from "../features/homeSlice";
 
 const persistConfig = {
   storage: AsyncStorage,
@@ -22,7 +23,10 @@ const rootReducer = combineReducers({
 
 export const persistedReducer = persistReducer(persistConfig, rootReducer);
 export const store = configureStore({
-  reducer: persistedReducer,
+  reducer: {
+    persistedReducer: persistedReducer,
+    homeReducer: homeReducer,
+  },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {

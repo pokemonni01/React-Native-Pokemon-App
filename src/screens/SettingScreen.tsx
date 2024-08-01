@@ -4,15 +4,16 @@ import { RootState } from "../redux/store";
 import { toggleDarkMode } from "../redux/settingSlice";
 import baseStyling from "../core/style";
 import colors from "../core/colors";
+import { Theme } from "../types/enums/Theme";
 
 type Props = {};
 
 const SettingScreen = () => {
   const isDarkModeEnabled = useSelector(
-    (state: RootState) => state.settingReducer.isDarkModeEnabled
+    (state: RootState) => state.persistedReducer.settingReducer.isDarkModeEnabled
   );
-  const baseStyle = baseStyling(isDarkModeEnabled ? "dark" : "light");
-  const styles = styling(isDarkModeEnabled ? "dark" : "light");
+  const baseStyle = baseStyling(isDarkModeEnabled ? Theme.Dark : Theme.Light);
+  const styles = styling(isDarkModeEnabled ? Theme.Dark : Theme.Light);
   const dispatch = useDispatch();
 
   return (
@@ -30,8 +31,8 @@ const SettingScreen = () => {
   );
 };
 
-const styling = (theme: String) => {
-  const color = theme === "dark" ? colors.dark : colors.light;
+const styling = (theme: Theme) => {
+  const color = theme == Theme.Dark ? colors.dark : colors.light;
   return StyleSheet.create({
     container: {
       width: "100%",

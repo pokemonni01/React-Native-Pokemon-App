@@ -1,34 +1,43 @@
-import { NavigationContainer } from "@react-navigation/native";
+import { DarkTheme, DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import SettingScreen from "./src/screens/SettingScreen";
-import { Provider as ReduxProvider } from "react-redux";
-import { store, persistor } from "./src/redux/store";
+import { Provider as ReduxProvider, useSelector } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
-import { useSelector } from "react-redux";
-import { RootState } from "./src/redux/store";
-import { DarkTheme, DefaultTheme } from "@react-navigation/native";
+import colors from "./src/core/colors";
+import HomeScreen from "./src/features/HomeScreen";
+import { persistor, RootState, store } from "./src/redux/store";
+import SettingScreen from "./src/screens/SettingScreen";
+import { Theme } from "./src/types/enums/Theme";
+import { RootStackParamList } from "./src/types/RootStackParamList";
 
-const Stack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
-
   const AppContainer = () => {
     const isDarkModeEnabled = useSelector(
-      (state: RootState) => state.settingReducer.isDarkModeEnabled
+      (state: RootState) =>
+        state.persistedReducer.settingReducer.isDarkModeEnabled
     );
     const theme = isDarkModeEnabled ? "dark" : "light";
-    return(
-      <NavigationContainer  theme={theme === "dark" ? DarkTheme : DefaultTheme}>
-          <Stack.Navigator initialRouteName="Setting">
-            <Stack.Screen
-              name="Setting"
-              component={SettingScreen}
-              options={{ title: "Setting" }}
-            />
-          </Stack.Navigator>
-        </NavigationContainer>
+    const color = theme == Theme.Dark ? colors.dark : colors.light;
+    return (
+      <NavigationContainer theme={theme === "dark" ? DarkTheme : DefaultTheme}>
+        <Stack.Navigator initialRouteName="Home">
+          <Stack.Screen
+            name="Home"
+            component={HomeScreen}
+            options={{
+              title: "Home",
+            }}
+          />
+          <Stack.Screen
+            name="Setting"
+            component={SettingScreen}
+            options={{ title: "Setting" }}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
     );
-  }
+  };
 
   return (
     <ReduxProvider store={store}>
