@@ -1,4 +1,4 @@
-import { View, Text, ScrollView } from "react-native";
+import { View, Text, ScrollView, NativeScrollEvent } from "react-native";
 import { Loading } from "../components/Loading";
 import { Theme } from "../types/enums/Theme";
 import { useDispatch, useSelector } from "react-redux";
@@ -6,10 +6,11 @@ import { RootState } from "../redux/store";
 import { StyleSheet } from "react-native";
 import colors from "../core/colors";
 import { HomeScreenState } from "./homeSlice";
-import { useEffect } from "react";
-import pokemonApi from "../services/pokemonApi";
+import { useEffect, useRef } from "react";
+import { fetchPokemons } from "../services/pokemonApi";
 import { setHomeScreenState, setPokemons } from "./homeSlice";
 import { PokemonItem } from "../components/PokemonItem";
+
 
 const HomeScreen = () => {
   const isDarkModeEnabled = useSelector(
@@ -26,6 +27,7 @@ const HomeScreen = () => {
     (state: RootState) => state.homeReducer.pokemons
   );
   const dispatch = useDispatch();
+  const scrollViewRef = useRef<ScrollView>(null);
 
   useEffect(() => {
     if (state === HomeScreenState.INITIAL) {
@@ -36,14 +38,22 @@ const HomeScreen = () => {
   const fetchData = async () => {
     dispatch(setHomeScreenState(HomeScreenState.LOADING));
     try {
-      const data = await pokemonApi.fetchPokemons();
-      console.log(data.results);
+      const data = await fetchPokemons();
       dispatch(setHomeScreenState(HomeScreenState.SUCCESS));
       dispatch(setPokemons(data.results));
     } catch (error: any) {
       dispatch(setHomeScreenState(HomeScreenState.ERROR));
     }
   };
+
+  const loadMore = async () => {
+    try {
+      const data = await fetchPokemons({ offset: pokemons.length, limit: 20 });
+      dispatch(setPokemons([...pokemons, ...data.results]));
+    } catch (error: any) {
+      dispatch(setHomeScreenState(HomeScreenState.ERROR));
+    }
+  }
 
   const LoadingState = () => {
     return (
@@ -53,14 +63,35 @@ const HomeScreen = () => {
     );
   };
 
+  const isCloseToBottom = ({
+    layoutMeasurement,
+    contentOffset,
+    contentSize,
+  }: NativeScrollEvent) => {
+    return (
+      layoutMeasurement.height + contentOffset.y >= contentSize.height - 20
+    );
+  };
+
   const SuccessState = () => {
-    return <ScrollView>
-      {
-        pokemons.map((pokemon) => {
-          return <PokemonItem key={pokemon.name} pokemon={pokemon} theme={theme} />;
-        })
-      }
-    </ScrollView>;
+    return (
+      <ScrollView
+        ref={scrollViewRef}
+        onScroll={({ nativeEvent }) => {
+          nativeEvent.layoutMeasurement;
+          if (isCloseToBottom(nativeEvent)) {
+            loadMore();
+          }
+        }}
+        scrollEventThrottle={400}
+      >
+        {pokemons.map((pokemon) => {
+          return (
+            <PokemonItem key={pokemon.name} pokemon={pokemon} theme={theme} />
+          );
+        })}
+      </ScrollView>
+    );
   };
 
   const handleState = (state: HomeScreenState) => {

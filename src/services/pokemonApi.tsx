@@ -1,21 +1,22 @@
 import axios from "axios";
 import Pokemon from "../types/Pokemon";
+
 const baseUrl = "https://pokeapi.co/api/v2";
 
 type PokemonListResponse = {
-    results: Pokemon[];
-    };
-
-type PokemonApi = {
-  fetchPokemons: () => Promise<PokemonListResponse>;
+  results: Pokemon[];
 };
 
-const pokemonApi: PokemonApi = {
-  fetchPokemons: async () => {
-    const url = `${baseUrl}/pokemon`;
-    const response = await axios.get<PokemonListResponse>(url,);
-    return response.data;
-},
+type FetchPokemonsParams = {
+  offset: number;
+  limit: number;
 };
 
-export default pokemonApi;
+export const fetchPokemons = async ({
+  offset,
+  limit,
+}: FetchPokemonsParams=  { offset: 0, limit: 20 }) => {
+  const url = `${baseUrl}/pokemon` + `?offset=${offset}&limit=${limit}`;
+  const response = await axios.get<PokemonListResponse>(url);
+  return response.data;
+};
