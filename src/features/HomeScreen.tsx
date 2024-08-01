@@ -1,18 +1,21 @@
-import { View, Text, ScrollView, NativeScrollEvent } from "react-native";
-import { Loading } from "../components/Loading";
-import { Theme } from "../types/enums/Theme";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../redux/store";
-import { StyleSheet } from "react-native";
-import colors from "../core/colors";
-import { HomeScreenState } from "./homeSlice";
+import { useNavigation } from "@react-navigation/native";
 import { useEffect, useRef } from "react";
-import { fetchPokemons } from "../services/pokemonApi";
-import { setHomeScreenState, setPokemons } from "./homeSlice";
+import { NativeScrollEvent, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Icon } from "react-native-paper";
+import { useDispatch, useSelector } from "react-redux";
+import { Loading } from "../components/Loading";
 import { PokemonItem } from "../components/PokemonItem";
+import colors from "../core/colors";
+import { RootState } from "../redux/store";
+import { fetchPokemons } from "../services/pokemonApi";
+import { Theme } from "../types/enums/Theme";
+import { HomeScreenState, setHomeScreenState, setPokemons } from "./homeSlice";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../types/RootStackParamList";
 
+export type Props = NativeStackScreenProps<RootStackParamList, "Home">;
 
-const HomeScreen = () => {
+const HomeScreen = ({ route, navigation }: Props) => {
   const isDarkModeEnabled = useSelector(
     (state: RootState) =>
       state.persistedReducer.settingReducer.isDarkModeEnabled
@@ -28,12 +31,27 @@ const HomeScreen = () => {
   );
   const dispatch = useDispatch();
   const scrollViewRef = useRef<ScrollView>(null);
+  const color = theme == Theme.Dark ? colors.dark : colors.light;
 
   useEffect(() => {
     if (state === HomeScreenState.INITIAL) {
       fetchData();
     }
+    setHeaderRight();
   });
+
+  const setHeaderRight = () => {
+    navigation.setOptions({
+      headerRight: () => (
+        <TouchableOpacity
+          style={styles.headerRight}
+          onPress={() => navigation.navigate("Setting")}
+        >
+          <Icon source="cog" size={24} color={color.white} />
+        </TouchableOpacity>
+      ),
+    });
+  }
 
   const fetchData = async () => {
     dispatch(setHomeScreenState(HomeScreenState.LOADING));
@@ -53,7 +71,7 @@ const HomeScreen = () => {
     } catch (error: any) {
       dispatch(setHomeScreenState(HomeScreenState.ERROR));
     }
-  }
+  };
 
   const LoadingState = () => {
     return (
@@ -117,6 +135,16 @@ const styling = (theme: Theme) => {
       flex: 1,
     },
     loading: { flex: 1, justifyContent: "center", alignItems: "center" },
+    navHeaderIcon: {
+      color: color.white,
+    },
+    headerRight: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      padding: 8,
+      marginEnd: 8,
+    }
   });
 };
 
