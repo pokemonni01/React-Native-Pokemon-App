@@ -18,6 +18,7 @@ import { fetchPokemons } from "../services/pokemonApi";
 import { Theme } from "../types/enums/Theme";
 import { RootStackParamList } from "../types/RootStackParamList";
 import { HomeScreenState, setHomeScreenState, setPokemons } from "./homeSlice";
+import { LoadingScreen } from "../components/LoadingScreen";
 
 export type Props = NativeStackScreenProps<RootStackParamList, "Home">;
 
@@ -99,22 +100,25 @@ const HomeScreen = ({ route, navigation }: Props) => {
 
   const SuccessState = () => {
     return (
-      <ScrollView
-        ref={scrollViewRef}
-        onScroll={({ nativeEvent }) => {
-          nativeEvent.layoutMeasurement;
-          if (isCloseToBottom(nativeEvent)) {
-            loadMore();
-          }
-        }}
-        scrollEventThrottle={400}
-      >
-        {pokemons.map((pokemon) => {
-          return (
-            <PokemonItem key={pokemon.name} pokemon={pokemon} theme={theme} />
-          );
-        })}
-      </ScrollView>
+      <View style={styles.container}>
+        <ScrollView
+          ref={scrollViewRef}
+          onScroll={({ nativeEvent }) => {
+            nativeEvent.layoutMeasurement;
+            if (isCloseToBottom(nativeEvent)) {
+              loadMore();
+            }
+          }}
+          scrollEventThrottle={400}
+        >
+          {pokemons.map((pokemon) => {
+            return (
+              <PokemonItem key={pokemon.name} pokemon={pokemon} theme={theme} />
+            );
+          })}
+        </ScrollView>
+        <LoadingScreen theme={theme} />
+      </View>
     );
   };
 
