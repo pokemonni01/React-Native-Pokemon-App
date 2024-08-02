@@ -1,17 +1,23 @@
-import { useNavigation } from "@react-navigation/native";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useRef } from "react";
-import { NativeScrollEvent, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  NativeScrollEvent,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { Icon } from "react-native-paper";
 import { useDispatch, useSelector } from "react-redux";
 import { Loading } from "../components/Loading";
 import { PokemonItem } from "../components/PokemonItem";
+import { RetryButton } from "../components/RetryButton";
 import colors from "../core/colors";
 import { RootState } from "../redux/store";
 import { fetchPokemons } from "../services/pokemonApi";
 import { Theme } from "../types/enums/Theme";
-import { HomeScreenState, setHomeScreenState, setPokemons } from "./homeSlice";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../types/RootStackParamList";
+import { HomeScreenState, setHomeScreenState, setPokemons } from "./homeSlice";
 
 export type Props = NativeStackScreenProps<RootStackParamList, "Home">;
 
@@ -51,7 +57,7 @@ const HomeScreen = ({ route, navigation }: Props) => {
         </TouchableOpacity>
       ),
     });
-  }
+  };
 
   const fetchData = async () => {
     dispatch(setHomeScreenState(HomeScreenState.LOADING));
@@ -112,6 +118,17 @@ const HomeScreen = ({ route, navigation }: Props) => {
     );
   };
 
+  const ErrorState = () => {
+    return (
+      <View style={styles.errorState}>
+        <View style={styles.errorStateIcon}>
+          <Icon source="wifi-off" size={120} color={color.white} />
+        </View>
+        <RetryButton onPress={fetchData} theme={theme} />
+      </View>
+    );
+  };
+
   const handleState = (state: HomeScreenState) => {
     switch (state) {
       case HomeScreenState.LOADING:
@@ -119,7 +136,7 @@ const HomeScreen = ({ route, navigation }: Props) => {
       case HomeScreenState.SUCCESS:
         return <SuccessState />;
       case HomeScreenState.ERROR:
-        return <Text>Error</Text>;
+        return <ErrorState />;
     }
   };
 
@@ -135,6 +152,15 @@ const styling = (theme: Theme) => {
       flex: 1,
     },
     loading: { flex: 1, justifyContent: "center", alignItems: "center" },
+    errorState: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      flexDirection: "column",
+    },
+    errorStateIcon: {
+      marginBottom: 16,
+    },
     navHeaderIcon: {
       color: color.white,
     },
@@ -144,7 +170,7 @@ const styling = (theme: Theme) => {
       alignItems: "center",
       padding: 8,
       marginEnd: 8,
-    }
+    },
   });
 };
 
